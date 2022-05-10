@@ -1,1 +1,1 @@
-from invoke_release.version import __version_info__, __version__ # noqa: F401
+from invoke_release.version import __version__, __version_info__  # noqa: F401
