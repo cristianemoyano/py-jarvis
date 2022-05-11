@@ -14,9 +14,9 @@ class Suscriber(ABC):
     """
 
     @abstractmethod
-    def update(self, subject):
+    def on_action(self, publisher, **kwargs):
         """
-        Receive update from subject.
+        Receive action from Publisher.
         """
         pass
 
@@ -41,7 +41,7 @@ class Publisher(ABC):
         pass
 
     @abstractmethod
-    def notify(self):
+    def notify(self, **kwargs):
         """
         Notify all sucribers about an event.
         """
@@ -82,16 +82,16 @@ class ConcretePublisher(Publisher):
     The subscription management methods.
     """
 
-    def notify(self):
+    def notify(self, **kwargs):
         """
         Trigger an update in each subscriber.
         """
 
         logger.info(f"{self.__class__.__name__}: Notifying observers...")
         for suscriber in self._sucribers:
-            suscriber.update(self)
+            suscriber.on_action(self, **kwargs)
 
-    def some_method(self):
+    def action(self, **kwargs):
         """
         Usually, the subscription logic is only a fraction of what a Subject can
         really do. Subjects commonly hold some important business logic, that
@@ -105,7 +105,7 @@ class ConcretePublisher(Publisher):
         logger.info(
             f"{self.__class__.__name__}: My state has just changed to: {self._state}"
         )
-        self.notify()
+        self.notify(**kwargs)
 
 
 """
@@ -115,15 +115,15 @@ attached to.
 
 
 class ConcreteSuscriberA(Suscriber):
-    def update(self, publisher: Publisher):
+    def on_action(self, publisher: Publisher, **kwargs):
         if publisher._state < 3:
-            logger.info(f"{self.__class__.__name__}: Reacted to the event")
+            logger.info(f"{self.__class__.__name__}: Reacted to the event: {kwargs}")
 
 
 class ConcreteSuscriberB(Suscriber):
-    def update(self, publisher: Publisher):
+    def on_action(self, publisher: Publisher, **kwargs):
         if publisher._state == 0 or publisher._state >= 2:
-            logger.info(f"{self.__class__.__name__}: Reacted to the event")
+            logger.info(f"{self.__class__.__name__}: Reacted to the event {kwargs}")
 
 
 if __name__ == "__main__":
@@ -137,9 +137,9 @@ if __name__ == "__main__":
     observer_b = ConcreteSuscriberB()
     publisher.subscribe(observer_b)
 
-    publisher.some_method()
-    publisher.some_method()
+    publisher.action(**{"parameter_1": 1})
+    publisher.action(**{"parameter_2": 2})
 
     publisher.unsubscribe(observer_a)
 
-    publisher.some_method()
+    publisher.action(**{"parameter_3": 3})
