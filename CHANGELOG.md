@@ -23,3 +23,8 @@ Initial commit
 ------------------
 - [MINOR] Add Observer pattern
 
+
+0.6.0 (2022-05-11)
+------------------
+- [MINOR] Improve parameters
+
