@@ -48,3 +48,7 @@ repos:
             "flake8-simplify",
         ]
         exclude: version.py
+  - repo: https://github.com/jazzband/pip-tools
+    rev: 6.3.0
+    hooks:
+      - id: pip-compile
