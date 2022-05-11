@@ -1,6 +1,15 @@
+import logging
+from time import sleep
+
 import pyttsx3
+from utils.logger import setup_logger
 
 engine = pyttsx3.init()  # object creation
+
+logger = logging.getLogger(__name__)
+
+setup_logger(logger)
+
 
 """ RATE"""
 
@@ -19,9 +28,22 @@ engine.setProperty(
     "voice", voices[0].id
 )  # changing index, changes voices. 1 for female
 
-engine.say("Hey there! My name is Jarvis, but you can call me J")
-engine.runAndWait()
-engine.stop()
+
+def speak(message):
+    if not engine._inLoop:
+        engine.say(message)
+        logger.info("Not in loop..run and wait")
+        engine.runAndWait()
+        sleep(2)
+        engine.endLoop()
+    else:
+        logger.info("in loop..stop, run and wait")
+        engine.endLoop()
+        engine.say(message)
+        engine.runAndWait()
+        sleep(2)
+        engine.endLoop()
+
 
 # """Saving Voice to a file"""
 # # On linux make sure that 'espeak' and 'ffmpeg' are installed
