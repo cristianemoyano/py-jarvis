@@ -1,3 +1,5 @@
 py-jarvis/
 
 .DS_Store
+
+__pycache__
