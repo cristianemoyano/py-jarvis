@@ -18,3 +18,8 @@ Initial commit
 ------------------
 - [MINOR] add loggers config and main demo
 
+
+0.5.0 (2022-05-11)
+------------------
+- [MINOR] Add Observer pattern
+
