@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from random import randrange
+from collections.abc import Iterable
 
 from logger import setup_logger
 
@@ -10,7 +10,7 @@ setup_logger(logger)
 
 class Suscriber(ABC):
     """
-    The Observer interface declares the update method, used by subjects.
+    The Suscriber interface declares the on_action method, used by suscribers.
     """
 
     @abstractmethod
@@ -21,7 +21,7 @@ class Suscriber(ABC):
         pass
 
 
-class Publisher(ABC):
+class PublisherInterface(ABC):
     """
     The Subject interface declares a set of methods for managing subscribers.
     """
@@ -29,48 +29,41 @@ class Publisher(ABC):
     @abstractmethod
     def subscribe(self, sucriber: Suscriber):
         """
-        Attach an sucriber to the subject.
+        Attach an sucriber to the publisher.
         """
         pass
 
     @abstractmethod
     def unsubscribe(self, sucriber: Suscriber):
         """
-        Detach an sucriber from the subject.
+        Detach an sucriber from the publisher.
         """
         pass
 
     @abstractmethod
-    def notify(self, **kwargs):
+    def publish(self, **kwargs):
         """
         Notify all sucribers about an event.
         """
         pass
 
 
-class ConcretePublisher(Publisher):
+class Publisher(PublisherInterface):
     """
-    The Publisher owns some important state and notifies observers when the state
-    changes.
-    """
-
-    _state: int = None
-    """
-    For the sake of simplicity, the Publisher's state, essential to all
-    subscribers, is stored in this variable.
+    The Publisher notifies suscribers when the publish is called
     """
 
-    _sucribers: list[Suscriber] = []
-    """
-    List of subscribers. In real life, the list of subscribers can be stored
-    more comprehensively (categorized by event type, etc.).
-    """
+    def __init__(self, event_code):
+        self.event_code = event_code
+        super().__init__()
+
+    _sucribers: set[Suscriber] = set()
 
     def subscribe(self, suscriber: Suscriber):
-        logger.info(
-            f"{self.__class__.__name__}: Attached an suscriber: {suscriber.__class__.__name__}"
+        logger.info(f"{self.__class__.__name__}: Attached suscribers: {suscriber}")
+        self._sucribers |= (
+            set(suscriber) if isinstance(suscriber, Iterable) else {suscriber}
         )
-        self._sucribers.append(suscriber)
 
     def unsubscribe(self, suscriber: Suscriber):
         logger.info(
@@ -78,68 +71,82 @@ class ConcretePublisher(Publisher):
         )
         self._sucribers.remove(suscriber)
 
-    """
-    The subscription management methods.
-    """
-
-    def notify(self, **kwargs):
+    def publish(self, **kwargs):
         """
-        Trigger an update in each subscriber.
+        Trigger an event in each subscriber.
         """
 
         logger.info(f"{self.__class__.__name__}: Notifying observers...")
         for suscriber in self._sucribers:
             suscriber.on_action(self, **kwargs)
 
-    def action(self, **kwargs):
-        """
-        Usually, the subscription logic is only a fraction of what a Subject can
-        really do. Subjects commonly hold some important business logic, that
-        triggers a notification method whenever something important is about to
-        happen (or after it).
-        """
 
-        logger.info(f"{self.__class__.__name__}: I'm doing something important.")
-        self._state = randrange(0, 10)
+PIZZA_DONE_EVENT_CODE = "PIZZA_DONE"
+pizza_done_event = Publisher(event_code=PIZZA_DONE_EVENT_CODE)
 
-        logger.info(
-            f"{self.__class__.__name__}: My state has just changed to: {self._state}"
+PIZZA_PAID_EVENT_CODE = "PIZZA_PAID"
+pizza_paid_event = Publisher(event_code=PIZZA_PAID_EVENT_CODE)
+
+
+class PizzaStore:
+    def pay_pizza(self, client, amount, order):
+        """
+        Send pizza
+        """
+        logger.info(f"{self.__class__.__name__}: Pizza paid")
+        pizza_paid_event.publish(
+            sender=self.__class__, client=client, amount=amount, order=order
         )
-        self.notify(**kwargs)
+
+    def send_pizza(self, toppings, size):
+        """
+        Send pizza
+        """
+        logger.info(f"{self.__class__.__name__}: Pizza sent")
+        pizza_done_event.publish(sender=self.__class__, toppings=toppings, size=size)
 
 
 """
-Concrete Observers react to the updates issued by the Subject they had been
-attached to.
+Concrete Suscribers react to the updates issued by the Publisher they had been
+suscribed to.
 """
 
 
-class ConcreteSuscriberA(Suscriber):
-    def on_action(self, publisher: Publisher, **kwargs):
-        if publisher._state < 3:
-            logger.info(f"{self.__class__.__name__}: Reacted to the event: {kwargs}")
+class EmailSuscriber(Suscriber):
+    def on_action(self, publisher, **kwargs):
+        if publisher.event_code == PIZZA_DONE_EVENT_CODE:
+            logger.info(f"{self.__class__.__name__}: Sending email: {kwargs}")
 
 
-class ConcreteSuscriberB(Suscriber):
-    def on_action(self, publisher: Publisher, **kwargs):
-        if publisher._state == 0 or publisher._state >= 2:
-            logger.info(f"{self.__class__.__name__}: Reacted to the event {kwargs}")
+class SMSSuscriber(Suscriber):
+    def on_action(self, publisher, **kwargs):
+        if publisher.event_code == PIZZA_DONE_EVENT_CODE:
+            logger.info(f"{self.__class__.__name__}: Sending sms {kwargs}")
+
+
+class PaymentSuscriber(Suscriber):
+    def on_action(self, publisher, **kwargs):
+        if publisher.event_code == PIZZA_PAID_EVENT_CODE:
+            logger.info(f"{self.__class__.__name__}: Sending payment {kwargs}")
 
 
 if __name__ == "__main__":
     # The client code.
 
-    publisher = ConcretePublisher()
+    email_suscriber = EmailSuscriber()
+    sms_suscriber = SMSSuscriber()
+    payment_suscriber = PaymentSuscriber()
+    pizza_done_event.subscribe({email_suscriber, sms_suscriber})
+    pizza_paid_event.subscribe(payment_suscriber)
 
-    observer_a = ConcreteSuscriberA()
-    publisher.subscribe(observer_a)
+    pizza_store = PizzaStore()
+    pizza_store.pay_pizza(client="John Doe", amount=185.03, order="3 Pizzas")
 
-    observer_b = ConcreteSuscriberB()
-    publisher.subscribe(observer_b)
+    pizza_store.send_pizza(**{"toppings": ["tomato"], "size": 8})
 
-    publisher.action(**{"parameter_1": 1})
-    publisher.action(**{"parameter_2": 2})
+    pizza_store.send_pizza(**{"toppings": ["tomato"], "size": 8})
+    pizza_store.send_pizza(**{"toppings": ["tomato"], "size": 12})
 
-    publisher.unsubscribe(observer_a)
+    pizza_done_event.unsubscribe(sms_suscriber)
 
-    publisher.action(**{"parameter_3": 3})
+    pizza_store.send_pizza(**{"toppings": ["tomato"], "size": 3})
