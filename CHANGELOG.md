@@ -28,3 +28,8 @@ Initial commit
 ------------------
 - [MINOR] Improve parameters
 
+
+0.7.0 (2022-05-11)
+------------------
+- [MINOR] Improving observer pattern
+
