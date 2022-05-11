@@ -13,3 +13,8 @@ Initial commit
 ------------------
 - [MINOR] Replace Pipfile by pip-compile
 
+
+0.4.0 (2022-05-10)
+------------------
+- [MINOR] add loggers config and main demo
+
