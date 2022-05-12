@@ -38,3 +38,8 @@ Initial commit
 ------------------
 -[MINOR] add singleton
 
+
+0.9.0 (2022-05-12)
+------------------
+- [MINOR] Add strategy
+
