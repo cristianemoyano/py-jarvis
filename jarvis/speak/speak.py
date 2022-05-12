@@ -5,13 +5,9 @@ from time import sleep
 import pyttsx3
 from gtts import gTTS
 from playsound import playsound
+from settings import SETTINGS
 
 logger = logging.getLogger(__name__)
-
-
-GTTS_ENGINE = "gtts"
-PYTTSX3_ENGINE = "pyttsx3"
-SPEECH_ENGINE_DEFAULT = GTTS_ENGINE
 
 
 class SpeakStrategy(ABC):
@@ -53,17 +49,17 @@ class SpeakAPI:
 
 class GTTSEngineStrategy(SpeakStrategy):
     def speak(self, message):
-        audio = gTTS(message, tld="com", lang="en")
-        audio.save("textaudio.mp3")
-        playsound("textaudio.mp3")
+        audio = gTTS(message, tld=SETTINGS.GTTS_TLD, lang=SETTINGS.GTTS_LANG)
+        audio.save(SETTINGS.GTTS_AUDIO_FILENAME)
+        playsound(SETTINGS.GTTS_AUDIO_FILENAME)
 
 
 class Pyttsx3EngineStrategy(SpeakStrategy):
     _data = {}
 
-    RATE = 162
-    VOLUME = 0.8
-    VOICE_INDEX = 0
+    RATE = SETTINGS.PYTTSX3_RATE
+    VOLUME = SETTINGS.PYTTSX3_VOLUME
+    VOICE_INDEX = SETTINGS.PYTTSX3_VOICE_INDEX
 
     @classmethod
     def engine(cls):
@@ -103,12 +99,12 @@ class Pyttsx3EngineStrategy(SpeakStrategy):
 
 def get_speak_strategy_instance(strategy_code):
     SPEECH_ENGINE_MAP = {
-        GTTS_ENGINE: GTTSEngineStrategy,
-        PYTTSX3_ENGINE: Pyttsx3EngineStrategy,
+        SETTINGS.GTTS_ENGINE: GTTSEngineStrategy,
+        SETTINGS.PYTTSX3_ENGINE: Pyttsx3EngineStrategy,
     }
     return SPEECH_ENGINE_MAP[strategy_code]()
 
 
 def speak(message):
-    api = SpeakAPI(get_speak_strategy_instance(SPEECH_ENGINE_DEFAULT))
+    api = SpeakAPI(get_speak_strategy_instance(SETTINGS.SPEECH_ENGINE_DEFAULT))
     api.speak(message)

@@ -1,4 +1,5 @@
 import logging
+import time
 
 from hear.speech_recognition.mic_recognition import listen
 from speak.speak import speak
@@ -29,4 +30,12 @@ def callback(recognizer, audio):
         )
 
 
-listen(callback)
+stop_listening = listen(callback)
+
+# we're still listening even though the main thread is doing other things
+time.sleep(60)
+
+logger.info("Stop listening..")
+# calling this function requests that the background listener stop listening
+stop_listening(wait_for_stop=False)
+logger.info("Bye.")
