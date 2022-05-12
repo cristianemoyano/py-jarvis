@@ -3,3 +3,5 @@ py-jarvis/
 .DS_Store
 
 __pycache__
+
+*.mp3
