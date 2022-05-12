@@ -1,4 +1,5 @@
 import logging
+import time
 
 from hear.speech_recognition.mic_recognition import listen
 from speak.speak import speak
@@ -21,11 +22,20 @@ def callback(recognizer, audio):
         logger.info(text)
         speak(text)
     except UnknownValueError:
-        logger.info("Google Speech Recognition could not understand audio")
+        logger.error("Google Speech Recognition could not understand audio..")
+        speak("Sorry, can you repeat it again?")
     except RequestError as e:
-        logger.info(
+        logger.error(
             f"Could not request results from Google Speech Recognition service; {e}"
         )
 
 
-listen(callback)
+stop_listening = listen(callback)
+
+# we're still listening even though the main thread is doing other things
+time.sleep(60)
+
+logger.info("Stop listening..")
+# calling this function requests that the background listener stop listening
+stop_listening(wait_for_stop=False)
+logger.info("Bye.")
