@@ -21,9 +21,10 @@ def callback(recognizer, audio):
         logger.info(text)
         speak(text)
     except UnknownValueError:
-        logger.info("Google Speech Recognition could not understand audio")
+        logger.error("Google Speech Recognition could not understand audio..")
+        speak("Sorry, can you repeat it again?")
     except RequestError as e:
-        logger.info(
+        logger.error(
             f"Could not request results from Google Speech Recognition service; {e}"
         )
 

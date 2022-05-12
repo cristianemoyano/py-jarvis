@@ -2,7 +2,6 @@ import logging
 import time
 
 import speech_recognition as sr
-from utils.logger import setup_logger
 from utils.singleton import SingletonMeta
 
 # Example:
@@ -10,8 +9,6 @@ from utils.singleton import SingletonMeta
 
 
 logger = logging.getLogger(__name__)
-
-setup_logger(logger)
 
 
 class Recognizer(metaclass=SingletonMeta):

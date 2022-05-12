@@ -5,15 +5,13 @@ from time import sleep
 import pyttsx3
 from gtts import gTTS
 from playsound import playsound
-from utils.logger import setup_logger
 
 logger = logging.getLogger(__name__)
-setup_logger(logger)
 
 
 GTTS_ENGINE = "gtts"
 PYTTSX3_ENGINE = "pyttsx3"
-SPEECH_ENGINE_DEFAULT = PYTTSX3_ENGINE
+SPEECH_ENGINE_DEFAULT = GTTS_ENGINE
 
 
 class SpeakStrategy(ABC):

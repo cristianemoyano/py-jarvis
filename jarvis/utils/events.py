@@ -2,10 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 
-from logger import setup_logger
-
 logger = logging.getLogger(__name__)
-setup_logger(logger)
 
 
 class Suscriber(ABC):
