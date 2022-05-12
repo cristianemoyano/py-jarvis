@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from abc import ABC, abstractmethod
 from time import sleep
@@ -48,10 +49,27 @@ class SpeakAPI:
 
 
 class GTTSEngineStrategy(SpeakStrategy):
-    def speak(self, message):
-        audio = gTTS(message, tld=SETTINGS.GTTS_TLD, lang=SETTINGS.GTTS_LANG)
+    async def _save_audio(self, audio):
+        logger.info("saving audio")
         audio.save(SETTINGS.GTTS_AUDIO_FILENAME)
+
+    async def _play_sound(self):
+        logger.info("playing audio")
         playsound(SETTINGS.GTTS_AUDIO_FILENAME)
+
+    async def _save_and_play(self, audio):
+        await asyncio.gather(
+            self._save_audio(audio),
+            self._play_sound(),
+        )
+
+    async def _text_to_speech(self, text):
+        logger.info("getting audio")
+        return gTTS(text, tld=SETTINGS.GTTS_TLD, lang=SETTINGS.GTTS_LANG)
+
+    def speak(self, message):
+        audio = asyncio.run(self._text_to_speech(message))
+        asyncio.run(self._save_and_play(audio))
 
 
 class Pyttsx3EngineStrategy(SpeakStrategy):
