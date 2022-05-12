@@ -43,3 +43,9 @@ Initial commit
 ------------------
 - [MINOR] Add strategy
 
+
+0.10.0 (2022-05-12)
+-------------------
+- add settings
+- [MINOR] Improve logging errors
+
