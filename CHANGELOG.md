@@ -33,3 +33,8 @@ Initial commit
 ------------------
 - [MINOR] Improving observer pattern
 
+
+0.8.0 (2022-05-12)
+------------------
+-[MINOR] add singleton
+
